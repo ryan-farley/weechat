@@ -1128,11 +1128,14 @@ weechat_guile_signal_script_action_cb (const void *pointer, void *data,
  * Fills input.
  */
 
-int
-weechat_guile_port_fill_input (SCM port)
+size_t
+weechat_guile_port_fill_input (SCM port, SCM dst, size_t start, size_t count)
 {
     /* make C compiler happy */
     (void) port;
+    (void) dst;
+    (void) start;
+    (void) count;
 
     return ' ';
 }
@@ -1141,20 +1144,23 @@ weechat_guile_port_fill_input (SCM port)
  * Write.
  */
 
-void
-weechat_guile_port_write (SCM port, const void *data, size_t size)
+size_t
+weechat_guile_port_write (SCM port, SCM src, size_t start, size_t count)
 {
     char *data2, *ptr_data, *ptr_newline;
+    const char *data;
 
     /* make C compiler happy */
     (void) port;
 
-    data2 = malloc (size + 1);
-    if (!data2)
-        return;
+    data = scm_to_locale_string (src);
 
-    memcpy (data2, data, size);
-    data2[size] = '\0';
+    data2 = malloc (count + 1);
+    if (!data2)
+        return 0;
+
+    memcpy (data2, data + start, count);
+    data2[count] = '\0';
 
     ptr_data = data2;
     while ((ptr_newline = strchr (ptr_data, '\n')) != NULL)
@@ -1166,6 +1172,8 @@ weechat_guile_port_write (SCM port, const void *data, size_t size)
         ptr_data = ++ptr_newline;
     }
     weechat_string_dyn_concat (guile_buffer_output, ptr_data);
+
+    return count;
 }
 
 /*

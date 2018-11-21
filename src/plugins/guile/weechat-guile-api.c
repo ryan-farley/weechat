@@ -4832,7 +4832,7 @@ weechat_guile_api_upgrade_close (SCM upgrade_file)
 void
 weechat_guile_api_module_init (void *data)
 {
-    scm_t_bits port_type;
+    scm_t_port_type *port_type;
 
     /* make C compiler happy */
     (void) data;
